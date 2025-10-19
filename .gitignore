@@ -1,0 +1,8 @@
+.venv
+
+*.jpg
+*.png
+*.ico
+*.wav
+*.bat
+*.vbs
