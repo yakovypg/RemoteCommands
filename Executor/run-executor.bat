@@ -1,4 +1,4 @@
 @echo off
-cd /d "C:\Users\__USER__\Documents\Executor"
+cd /d "C:\Users\%USERNAME%\Documents\Executor"
 call .venv\Scripts\activate
 python executor.py
