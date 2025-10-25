@@ -56,7 +56,7 @@ LOG_FILE_MAX_SIZE_BYTES = int(cfg["LOG_FILE_MAX_SIZE_BYTES"])
 LOG_FILE_BACKUPS_COUNT = int(cfg["LOG_FILE_BACKUPS_COUNT"])
 
 logger_handler = RotatingFileHandler(
-    f"{__name__}.log",
+    f"{CLIENT_ID}.log",
     maxBytes=LOG_FILE_MAX_SIZE_BYTES,
     backupCount=LOG_FILE_BACKUPS_COUNT
 )
@@ -66,7 +66,8 @@ logger_handler.setFormatter(logging.Formatter(
     datefmt="%Y-%m-%d %H:%M:%S"
 ))
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(CLIENT_ID)
+logger.setLevel(logging.INFO)
 logger.addHandler(logger_handler)
 
 should_send_heartbeat = True
