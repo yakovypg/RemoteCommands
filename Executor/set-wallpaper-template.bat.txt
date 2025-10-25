@@ -1,0 +1,10 @@
+@echo off
+set "wallpaperPath=%~dp0__IMAGE-NAME__.jpg"
+
+rem select style: 0=center,2=stretch,6=fill,10=fit,22=tile
+set "STYLE=10"
+
+powershell -NoProfile -Command ^
+  "$p = '%wallpaperPath%'; $s = '%STYLE%'; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name Wallpaper -Value $p; Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name WallpaperStyle -Value $s; $tile = (if ($s -eq '22') {1} else {0}); Set-ItemProperty -Path 'HKCU:\\Control Panel\\Desktop' -Name TileWallpaper -Value $tile; Add-Type -MemberDefinition '[DllImport(\"user32.dll\")]public static extern bool SystemParametersInfo(int uAction,int uParam,string lpvParam,int fuWinIni);' -Name N -Namespace P; [P.N]::SystemParametersInfo(20,0,$p,3) | Out-Null"
+
+RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters ,1,True
