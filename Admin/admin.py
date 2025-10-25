@@ -1,7 +1,6 @@
 import base64
 import io
 import json
-import numpy as np
 import requests
 import threading
 import time
@@ -206,7 +205,7 @@ class App:
         log_label = ttk.Label(self.tab_controls, text="Logs")
         log_label.pack(anchor=tk.NW, padx=8)
         self.log = tk.Text(self.tab_controls, wrap=tk.NONE, height=20)
-        self.log.pack(fill=tk.BOTH, expand=True, padx=8, pady=(0,8))
+        self.log.pack(fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
 
         # Add scrollbars to log
         log_x = ttk.Scrollbar(self.tab_controls, orient=tk.HORIZONTAL, command=self.log.xview)
@@ -266,7 +265,7 @@ class App:
 
         command_thread = threading.Thread(
             target=send_command,
-            args=("play_wav", { "filename": file_name }),
+            args=("play_wav", {"filename": file_name}),
             daemon=True
         )
 
@@ -282,7 +281,7 @@ class App:
 
         command_thread = threading.Thread(
             target=send_command,
-            args=("run_bat", { "filename": file_name }),
+            args=("run_bat", {"filename": file_name}),
             daemon=True
         )
 

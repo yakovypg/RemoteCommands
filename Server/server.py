@@ -37,13 +37,10 @@ clients_lock = Lock()
 clients = {}
 
 def dict_value_filter(d: dict, value_pred):
-    return { k: v for k, v in d.items() if value_pred(v) }
+    return {k: v for k, v in d.items() if value_pred(v)}
 
 def query_parameter_to_bool(parameter):
-    return (
-        (parameter is not None) and
-        (parameter in ("1", "true", "yes", "on"))
-    )
+    return (parameter is not None) and (parameter in ("1", "true", "yes", "on"))
 
 def safe_put_to_queue(q: queue.Queue, item):
     try:
@@ -182,7 +179,7 @@ def post_command_result(client_id):
         logger.info(f"Trying to report {command} command result for client {client_id}")
 
     if not command:
-        logger.warning(f"Command name not specified")
+        logger.warning("Command name not specified")
         return jsonify({"error": "command required"}), 400
 
     with clients_lock:
@@ -195,7 +192,7 @@ def post_command_result(client_id):
         else:
             safe_put_to_queue(
                 clients[client_id]["buffer"],
-                { "type": "command_result", "command": command, "result": result }
+                {"type": "command_result", "command": command, "result": result}
             )
 
             clients[client_id]["commands"].pop(command, None)
@@ -219,7 +216,7 @@ def collect_screenshot(client_id):
 
         safe_put_to_queue(
             clients[client_id]["buffer"],
-            { "type": "screenshot", "data": data }
+            {"type": "screenshot", "data": data}
         )
 
         clients[client_id]["last_active"] = time.time()
@@ -254,7 +251,7 @@ def heartbeat(client_id):
     logger.info(f"Trying to report that client {client_id} is alive")
 
     if not client_id:
-        logger.warning(f"Client ID not specified")
+        logger.warning("Client ID not specified")
         return jsonify({"error": "client_id required"}), 400
 
     created = ensure_client(client_id)
