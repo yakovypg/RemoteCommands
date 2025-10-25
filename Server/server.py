@@ -1,17 +1,24 @@
+import json
 import logging
 import queue
 import time
 
 from flask import Flask, request, jsonify
+from pathlib import Path
 from threading import Thread, Lock
 
-HOST = '0.0.0.0'
-PORT = 8080
+_cfg_path = Path(__file__).parent / "config.json"
 
-MAX_BUFFER_SIZE = 100
+with _cfg_path.open("r", encoding="utf-8") as f:
+    cfg = json.load(f)
 
-MAX_CLIENT_INACTIVE_TIME_SEC = 10
-HEARTBEAT_CHECK_INTERVAL_SEC = 5
+HOST = cfg["HOST"]
+PORT = int(cfg["PORT"])
+
+MAX_BUFFER_SIZE = int(cfg["MAX_BUFFER_SIZE"])
+
+MAX_CLIENT_INACTIVE_TIME_SEC = float(cfg["MAX_CLIENT_INACTIVE_TIME_SEC"])
+HEARTBEAT_CHECK_INTERVAL_SEC = float(cfg["HEARTBEAT_CHECK_INTERVAL_SEC"])
 
 COMMAND_STATUS_ATTR = "__status"
 COMMAND_STATUS_IN_PROGRESS = "in_progress"

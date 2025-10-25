@@ -9,21 +9,27 @@ import tkinter as tk
 import queue
 
 from PIL import Image, ImageTk
+from pathlib import Path
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
-CLIENT_ID = "motya20252010"
-SERVER_URL = "http://rc.yprogs.ru:8080/"
+_cfg_path = Path(__file__).parent / "config.json"
+
+with _cfg_path.open("r", encoding="utf-8") as f:
+    cfg = json.load(f)
+
+CLIENT_ID = cfg["CLIENT_ID"]
+SERVER_URL = cfg["SERVER_URL"].rstrip("/") + "/"
 
 GET_CLIENT_BUFFER_URL = f"{SERVER_URL}buffer/{CLIENT_ID}"
 SEND_COMMAND_TO_CLIENT_URL = f"{SERVER_URL}send_command"
 
-REQUEST_TIMEOUT_SEC = 5
-BEFORE_EXIT_TIMEOUT_SEC = 0.2
+REQUEST_TIMEOUT_SEC = float(cfg["REQUEST_TIMEOUT_SEC"])
+BEFORE_EXIT_TIMEOUT_SEC = float(cfg["BEFORE_EXIT_TIMEOUT_SEC"])
 
-GET_CLIENT_BUFFER_INTERVAL_SEC = 0.2
-PROCESS_QUEUES_INTERVAL_MS = 33
+GET_CLIENT_BUFFER_INTERVAL_SEC = float(cfg["GET_CLIENT_BUFFER_INTERVAL_SEC"])
+PROCESS_QUEUES_INTERVAL_MS = int(cfg["PROCESS_QUEUES_INTERVAL_MS"])
 
-MAX_SCREENSHOTS_QUEUE_SIZE = 100
+MAX_SCREENSHOTS_QUEUE_SIZE = int(cfg["MAX_SCREENSHOTS_QUEUE_SIZE"])
 
 INFO_TYPE_ERROR = "error"
 INFO_TYPE_SENT = "sent"

