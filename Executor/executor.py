@@ -252,19 +252,17 @@ def connect_to_server_loop():
         time.sleep(CONNECT_RETRY_INTERVAL_SEC)
 
 def send_heartbeat_worker():
-    global should_send_heartbeat
-
+    # global variable
     while should_send_heartbeat:
         post_heartbeat_request()
         time.sleep(HEARTBEAT_INTERVAL_SEC)
 
 def send_screenshots_worker():
-    global should_send_screenshots
-
     try:
         with mss.mss() as sct:
             monitor = sct.monitors[0]
 
+            # global variable
             while should_send_screenshots:
                 try:
                     img_b64 = take_screenshot_b64(monitor, sct)
