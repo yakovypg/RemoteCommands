@@ -330,7 +330,7 @@ def send_screenshots_worker():
         post_command_result(START_SCREENSHOTS_COMMAND, False, str(e))
 
 def process_command(command_name, action):
-    logger.warning(f"Trying to process {command_name} command")
+    logger.info(f"Trying to process {command_name} command")
 
     command_ok, commad_process, command_message = action()
 
@@ -376,7 +376,7 @@ def process_commands(commands):
             process_command(SAVE_FILE_COMMAND, lambda: save_file(file_name, file_b64))
 
         elif command_name == REBOOT_COMMAND:
-            process_command(REBOOT_COMMAND, lambda: reboot)
+            process_command(REBOOT_COMMAND, reboot)
 
         else:
             logger.warning(f"Command {command_name} is not supported")
