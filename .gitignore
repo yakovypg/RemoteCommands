@@ -6,3 +6,9 @@
 *.wav
 *.bat
 *.vbs
+
+!Executor/configure.bat
+!Executor/add-autostart-task-higest.bat
+!Executor/add-autostart-task-limited.bat
+!Executor/run-executor.bat
+!Executor/run-executor.vbs
