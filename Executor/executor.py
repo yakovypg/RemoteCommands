@@ -328,55 +328,10 @@ def send_screenshots_worker():
     except Exception as e:
         post_command_result(START_SCREENSHOTS_COMMAND, False, str(e))
 
-def process_commands(commands):
-    command_ok = None
-    commad_process = None
-    command_message = None
-    command_name = None
+def process_command(command_name, action):
+    logger.warning(f"Trying to process {command_name} command")
 
-    if START_SCREENSHOTS_COMMAND in commands:
-        command_name = START_SCREENSHOTS_COMMAND
-        command_ok, commad_process, command_message = start_sending_screenshots()
-
-    if STOP_SCREENSHOTS_COMMAND in commands:
-        command_name = STOP_SCREENSHOTS_COMMAND
-        command_ok, commad_process, command_message = stop_sending_screenshots()
-
-    if PLAY_WAV_COMMAND in commands:
-        payload = commands.get(PLAY_WAV_COMMAND)
-        filename = payload.get("filename")
-
-        command_name = PLAY_WAV_COMMAND
-        command_ok, commad_process, command_message = play_wav_file(filename)
-
-    if RUN_BAT_COMMAND in commands:
-        payload = commands.get(RUN_BAT_COMMAND)
-        filename = payload.get("filename")
-
-        command_name = RUN_BAT_COMMAND
-        command_ok, commad_process, command_message = run_bat(filename)
-
-    if RUN_PY_COMMAND in commands:
-        payload = commands.get(RUN_PY_COMMAND)
-        filename = payload.get("filename")
-
-        command_name = RUN_PY_COMMAND
-        command_ok, commad_process, command_message = run_py(filename)
-
-    if SAVE_FILE_COMMAND in commands:
-        payload = commands.get(SAVE_FILE_COMMAND)
-        file_name = payload.get("file_name")
-        file_b64 = payload.get("file_b64")
-
-        command_name = SAVE_FILE_COMMAND
-        command_ok, commad_process, command_message = save_file(file_name, file_b64)
-
-    if REBOOT_COMMAND in commands:
-        command_name = REBOOT_COMMAND
-        command_ok, commad_process, command_message = reboot()
-
-    if command_name is None:
-        return
+    command_ok, commad_process, command_message = action()
 
     if commad_process:
         result_thread = Thread(target=post_process_result, args=(command_name, commad_process))
@@ -385,6 +340,45 @@ def process_commands(commands):
         post_command_status(command_name, COMMAND_STATUS_IN_PROGRESS)
     else:
         post_command_result(command_name, command_ok, command_message)
+
+def process_commands(commands):
+    for command_name in commands:
+        if command_name == START_SCREENSHOTS_COMMAND:
+            process_command(START_SCREENSHOTS_COMMAND, start_sending_screenshots)
+
+        elif command_name == STOP_SCREENSHOTS_COMMAND:
+            process_command(STOP_SCREENSHOTS_COMMAND, stop_sending_screenshots)
+
+        elif command_name == PLAY_WAV_COMMAND:
+            payload = commands.get(PLAY_WAV_COMMAND)
+            filename = payload.get("filename")
+
+            process_command(PLAY_WAV_COMMAND, lambda: play_wav_file(filename))
+
+        elif command_name == RUN_BAT_COMMAND:
+            payload = commands.get(RUN_BAT_COMMAND)
+            filename = payload.get("filename")
+
+            process_command(RUN_BAT_COMMAND, lambda: run_bat(filename))
+
+        elif command_name == RUN_PY_COMMAND:
+            payload = commands.get(RUN_PY_COMMAND)
+            filename = payload.get("filename")
+
+            process_command(RUN_PY_COMMAND, lambda: run_py(filename))
+
+        elif command_name == SAVE_FILE_COMMAND:
+            payload = commands.get(SAVE_FILE_COMMAND)
+            file_name = payload.get("file_name")
+            file_b64 = payload.get("file_b64")
+
+            process_command(SAVE_FILE_COMMAND, lambda: save_file(file_name, file_b64))
+
+        elif command_name == REBOOT_COMMAND:
+            process_command(REBOOT_COMMAND, lambda: reboot)
+
+        else:
+            logger.warning(f"Command {command_name} is not supported")
 
 def check_for_commands_loop():
     while True:
