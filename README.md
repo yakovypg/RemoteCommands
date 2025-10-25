@@ -15,7 +15,7 @@
 **RemoteCommands** is a collection of cross-platform applications designed for remote command execution. It consists of **Admin**, the application for sending commands; **Executor**, the application for executing commands; and **Server**, the application that provides communication between Admin and Executor.
 
 [![Contributors](https://img.shields.io/github/contributors/yakovypg/RemoteCommands)](https://github.com/yakovypg/RemoteCommands/graphs/contributors)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/yakovypg/RemoteCommands/dotnet.yml?branch=main)](https://github.com/yakovypg/RemoteCommands/actions/workflows/dotnet.yml?query=branch%3Amain)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/yakovypg/RemoteCommands/python-app.yml?branch=main)](https://github.com/yakovypg/RemoteCommands/actions/workflows/dotnet.yml?query=branch%3Amain)
 
 ## Main Features
 This project supports the following remote commands:
