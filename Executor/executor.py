@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import logging
 import mss
 import os
 import requests
@@ -9,6 +10,7 @@ import subprocess
 import sys
 import time
 
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from PIL import Image
 from threading import Thread
@@ -49,6 +51,23 @@ REBOOT_COMMAND = cfg["REBOOT_COMMAND"]
 
 COMMAND_STATUS_ATTR = cfg["COMMAND_STATUS_ATTR"]
 COMMAND_STATUS_IN_PROGRESS = cfg["COMMAND_STATUS_IN_PROGRESS"]
+
+LOG_FILE_MAX_SIZE_BYTES = int(cfg["LOG_FILE_MAX_SIZE_BYTES"])
+LOG_FILE_BACKUPS_COUNT = int(cfg["LOG_FILE_BACKUPS_COUNT"])
+
+logger_handler = RotatingFileHandler(
+    f"{__name__}.log",
+    maxBytes=LOG_FILE_MAX_SIZE_BYTES,
+    backupCount=LOG_FILE_BACKUPS_COUNT
+)
+
+logger_handler.setFormatter(logging.Formatter(
+    "%(asctime)s %(levelname)s %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+))
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logger_handler)
 
 should_send_heartbeat = True
 should_check_for_commands = True
@@ -131,10 +150,13 @@ def post_heartbeat_request():
     return post_data(POST_HEARTBEAT_URL)
 
 def start_sending_screenshots():
+    logger.info("Trying to start sending screenshots")
+
     global should_send_screenshots
     global screenshot_thread
 
     if should_send_screenshots and screenshot_thread and screenshot_thread.is_alive():
+        logger.warning("Screenshots are already being sent")
         return False, None, "screenshots are already being sent"
 
     should_send_screenshots = True
@@ -142,20 +164,29 @@ def start_sending_screenshots():
     screenshot_thread = Thread(target=send_screenshots_worker, daemon=True)
     screenshot_thread.start()
 
+    logger.info("Screenshots are starting to be sent")
+
     return True, None, "screenshots are starting to be sent"
 
 def stop_sending_screenshots():
+    logger.info("Trying to start sending screenshots")
+
     global should_send_screenshots
     should_send_screenshots = False
 
     if screenshot_thread:
         screenshot_thread.join(timeout=SCREENSHOT_THREAD_JOIN_TIMEOUT_SEC)
 
+    logger.info("Screenshots stopped being sent")
+
     return True, None, "screenshots stopped being sent"
 
 def play_wav_file(path):
+    logger.info(f"Trying to play {path}")
+
     try:
         if not os.path.exists(path):
+            logger.warning(f"File {path} not found")
             return False, None, f"{path} not found"
 
         process = None
@@ -178,15 +209,21 @@ def play_wav_file(path):
                     stderr=subprocess.DEVNULL
                 )
             else:
+                logger.warning(f"Failed to play {path}: no suitable player found")
                 return False, None, "no suitable player found"
 
-        return True, process, f"{path} started executing"
+        logger.info(f"File {path} started playing")
+        return True, process, f"{path} started playing"
     except Exception as e:
+        logger.warning(f"Failed to play {path}: {str(e)}")
         return False, None, str(e)
 
 def run_bat(path):
+    logger.info(f"Trying to execute {path}")
+
     try:
         if not os.path.exists(path):
+            logger.warning(f"File {path} not found")
             return False, None, f"{path} not found"
 
         if sys.platform.startswith("win"):
@@ -198,13 +235,18 @@ def run_bat(path):
                 text=True
             )
 
+            logger.info(f"File {path} started executing")
             return True, process, f"{path} started executing"
         else:
+            logger.warning(f"Failed to execute {path}: platform {sys.platform} not supported")
             return False, None, f"platform {sys.platform} not supported"
     except Exception as e:
+        logger.warning(f"Failed to execute {path}: {str(e)}")
         return False, None, str(e)
 
 def run_py(path):
+    logger.info(f"Trying to execute {path}")
+
     try:
         if not os.path.exists(path):
             return False, None, f"{path} not found"
@@ -216,22 +258,30 @@ def run_py(path):
             text=True
         )
 
+        logger.info(f"File {path} started executing")
         return True, process, f"{path} started executing"
     except Exception as e:
+        logger.warning(f"Failed to execute {path}: {str(e)}")
         return False, None, str(e)
 
 def save_file(file_name, file_b64):
+    logger.info(f"Trying to save {file_name}")
+
     try:
         file_bytes = base64.b64decode(file_b64)
 
         with open(file_name, 'wb') as file:
             file.write(file_bytes)
 
+        logger.info(f"File {file_name} saved")
         return True, None, f"{file_name} saved"
     except Exception as e:
+        logger.warning(f"Failed to save {file_name}: {str(e)}")
         return False, None, str(e)
 
 def reboot():
+    logger.info("Trying to reboot computer")
+
     try:
         if sys.platform.startswith("win"):
             os.system("shutdown /r /t 0")
@@ -240,13 +290,16 @@ def reboot():
 
         return True, None, "rebooted"
     except Exception as e:
+        logger.warning(f"Failed to reboot computer: {str(e)}")
         return False, None, str(e)
 
 def connect_to_server_loop():
     while True:
+        logger.info("Trying to connect to server")
         response = post_connect_to_server_request()
 
         if response and response.status_code == 200:
+            logger.info("Connected to server")
             return
 
         time.sleep(CONNECT_RETRY_INTERVAL_SEC)
@@ -254,6 +307,7 @@ def connect_to_server_loop():
 def send_heartbeat_worker():
     # global variable
     while should_send_heartbeat:
+        logger.info("Trying to send heartbeat request")
         post_heartbeat_request()
         time.sleep(HEARTBEAT_INTERVAL_SEC)
 
@@ -348,6 +402,7 @@ def check_for_commands_loop():
             time.sleep(CHECK_FOR_COMMANDS_INTERVAL_SEC)
 
 if __name__ == '__main__':
+    logger.info("Application started")
     connect_to_server_loop()
 
     Thread(target=send_heartbeat_worker, daemon=True).start()

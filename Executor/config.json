@@ -18,5 +18,7 @@
   "SAVE_FILE_COMMAND": "save_file",
   "REBOOT_COMMAND": "reboot",
   "COMMAND_STATUS_ATTR": "__status",
-  "COMMAND_STATUS_IN_PROGRESS": "in_progress"
+  "COMMAND_STATUS_IN_PROGRESS": "in_progress",
+  "LOG_FILE_MAX_SIZE_BYTES": 10000000,
+  "LOG_FILE_BACKUPS_COUNT": 2
 }
