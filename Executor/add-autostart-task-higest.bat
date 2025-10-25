@@ -1,0 +1,1 @@
+schtasks /Create /TN "RunExecutor" /TR "\"C:\Windows\System32\wscript.exe\" \"C:\Users\%USERNAME%\Documents\Executor\run-executor.vbs\"" /SC ONLOGON /RL HIGHEST /F /RU "%USERNAME%"
