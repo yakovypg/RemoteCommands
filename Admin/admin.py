@@ -193,6 +193,7 @@ class App:
 
         ttk.Button(controls_frame, text="Start Screenshots", width=20, command=self.start_screenshots).pack(pady=4)
         ttk.Button(controls_frame, text="Stop Screenshots", width=20, command=self.stop_screenshots).pack(pady=4)
+        ttk.Button(controls_frame, text="Open Photo", width=20, command=self.open_photo).pack(pady=4)
         ttk.Button(controls_frame, text="Play WAV", width=20, command=self.play_wav).pack(pady=4)
         ttk.Button(controls_frame, text="Run BAT", width=20, command=self.run_bat).pack(pady=4)
         ttk.Button(controls_frame, text="Run PY", width=20, command=self.run_py).pack(pady=4)
@@ -250,6 +251,22 @@ class App:
         command_thread = threading.Thread(
             target=send_command,
             args=("stop_screenshots",),
+            daemon=True
+        )
+
+        command_thread.start()
+
+    def open_photo(self):
+        file_name = ask_file_name_on_client(self.root)
+
+        if not file_name:
+            log_entry = create_log_entry(INFO_TYPE_ERROR, "open_photo", "file name not specified")
+            self._append_log(log_entry)
+            return
+
+        command_thread = threading.Thread(
+            target=send_command,
+            args=("open_photo", {"filename": file_name}),
             daemon=True
         )
 

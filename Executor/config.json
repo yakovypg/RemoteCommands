@@ -12,6 +12,7 @@
   "SCREENSHOT_TARGET_HEIGHT": 720,
   "START_SCREENSHOTS_COMMAND": "start_screenshots",
   "STOP_SCREENSHOTS_COMMAND": "stop_screenshots",
+  "OPEN_PHOTO_COMMAND": "open_photo",
   "PLAY_WAV_COMMAND": "play_wav",
   "RUN_BAT_COMMAND": "run_bat",
   "RUN_PY_COMMAND": "run_py",

