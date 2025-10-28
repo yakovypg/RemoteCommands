@@ -120,6 +120,13 @@ def ask_file_name_on_client(parent):
         "Enter file name on client:"
     )
 
+def ask_url(parent):
+    return try_ask_string(
+        parent,
+        "URL",
+        "Enter url:"
+    )
+
 def ask_args_for_script(parent):
     return try_ask_string(
         parent,
@@ -202,6 +209,7 @@ class App:
         ttk.Button(controls_frame, text="Start Screenshots", width=20, command=self.start_screenshots).pack(pady=4)
         ttk.Button(controls_frame, text="Stop Screenshots", width=20, command=self.stop_screenshots).pack(pady=4)
         ttk.Button(controls_frame, text="Open With Default App", width=20, command=self.open_with_default_app).pack(pady=4)
+        ttk.Button(controls_frame, text="Open URL", width=20, command=self.open_url).pack(pady=4)
         ttk.Button(controls_frame, text="Open Photo", width=20, command=self.open_photo).pack(pady=4)
         ttk.Button(controls_frame, text="Open Video", width=20, command=self.open_video).pack(pady=4)
         ttk.Button(controls_frame, text="Play WAV", width=20, command=self.play_wav).pack(pady=4)
@@ -257,6 +265,22 @@ class App:
 
     def open_with_default_app(self):
         self._send_open_command_with_asking_file_name("open_with_default_app")
+
+    def open_url(self):
+        url = ask_url(self.root)
+
+        if not url:
+            log_entry = create_log_entry(INFO_TYPE_ERROR, "open_url", "URL not specified")
+            self._append_log(log_entry)
+            return
+
+        command_thread = threading.Thread(
+            target=send_command,
+            args=("open_url", {"url": url}),
+            daemon=True
+        )
+
+        command_thread.start()
 
     def open_photo(self):
         self._send_open_command_with_asking_file_name("open_photo")

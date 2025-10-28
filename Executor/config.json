@@ -13,6 +13,7 @@
   "START_SCREENSHOTS_COMMAND": "start_screenshots",
   "STOP_SCREENSHOTS_COMMAND": "stop_screenshots",
   "OPEN_WITH_DEFAULT_APP_COMMAND": "open_with_default_app",
+  "OPEN_URL_COMMAND": "open_url",
   "OPEN_PHOTO_COMMAND": "open_photo",
   "OPEN_VIDEO_COMMAND": "open_video",
   "PLAY_WAV_COMMAND": "play_wav",

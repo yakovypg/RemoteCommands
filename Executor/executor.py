@@ -44,6 +44,7 @@ SCREENSHOT_TARGET_HEIGHT = int(cfg["SCREENSHOT_TARGET_HEIGHT"])
 START_SCREENSHOTS_COMMAND = cfg["START_SCREENSHOTS_COMMAND"]
 STOP_SCREENSHOTS_COMMAND = cfg["STOP_SCREENSHOTS_COMMAND"]
 OPEN_WITH_DEFAULT_APP_COMMAND = cfg["OPEN_WITH_DEFAULT_APP_COMMAND"]
+OPEN_URL_COMMAND = cfg["OPEN_URL_COMMAND"]
 OPEN_PHOTO_COMMAND = cfg["OPEN_PHOTO_COMMAND"]
 OPEN_VIDEO_COMMAND = cfg["OPEN_VIDEO_COMMAND"]
 PLAY_WAV_COMMAND = cfg["PLAY_WAV_COMMAND"]
@@ -380,6 +381,12 @@ def process_commands(commands):
             filename = payload.get("filename")
 
             process_command(OPEN_WITH_DEFAULT_APP_COMMAND, lambda: open_with_defaut_app(filename))
+
+        elif command_name == OPEN_URL_COMMAND:
+            payload = commands.get(OPEN_URL_COMMAND)
+            url = payload.get("url")
+
+            process_command(OPEN_URL_COMMAND, lambda: open_url(url))
 
         elif command_name == OPEN_PHOTO_COMMAND:
             payload = commands.get(OPEN_PHOTO_COMMAND)
