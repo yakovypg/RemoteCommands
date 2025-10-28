@@ -31,6 +31,11 @@ PROCESS_QUEUES_INTERVAL_MS = int(cfg["PROCESS_QUEUES_INTERVAL_MS"])
 
 MAX_SCREENSHOTS_QUEUE_SIZE = int(cfg["MAX_SCREENSHOTS_QUEUE_SIZE"])
 
+SCREENSHOT_TARGET_WIDTH = int(cfg["SCREENSHOT_TARGET_WIDTH"])
+SCREENSHOT_TARGET_HEIGHT = int(cfg["SCREENSHOT_TARGET_HEIGHT"])
+DEFAULT_REMOTE_WIDTH = int(cfg.get("DEFAULT_REMOTE_WIDTH"))
+DEFAULT_REMOTE_HEIGHT = int(cfg.get("DEFAULT_REMOTE_HEIGHT"))
+
 INFO_TYPE_ERROR = "error"
 INFO_TYPE_SENT = "sent"
 INFO_TYPE_RESULT = "result"
@@ -70,8 +75,8 @@ def create_log_entry(entry_type, command_name, data):
 
 def create_response_info(response):
     return {
-        "status_code": response.status_code,
-        "text": response.text
+        "status_code": response.status_code if response is not None else None,
+        "text": response.text if response is not None else None
     }
 
 def get_data(url, timeout=REQUEST_TIMEOUT_SEC):
@@ -238,8 +243,31 @@ class App:
         self.tab_screens = ttk.Frame(self.nb)
         self.nb.add(self.tab_screens, text="Screenshots")
 
+        # Controls above canvas: remote resolution and move_mouse checkbox
+        controls_top = ttk.Frame(self.tab_screens)
+        controls_top.pack(fill=tk.X, padx=8, pady=(8, 0))
+
+        ttk.Label(controls_top, text="Remote resolution:").pack(side=tk.LEFT, padx=(0, 4))
+        self.remote_width_var = tk.IntVar(value=DEFAULT_REMOTE_WIDTH)
+        self.remote_height_var = tk.IntVar(value=DEFAULT_REMOTE_HEIGHT)
+        self.remote_w_entry = ttk.Entry(controls_top, width=6, textvariable=self.remote_width_var)
+        self.remote_w_entry.pack(side=tk.LEFT)
+        ttk.Label(controls_top, text="x").pack(side=tk.LEFT, padx=2)
+        self.remote_h_entry = ttk.Entry(controls_top, width=6, textvariable=self.remote_height_var)
+        self.remote_h_entry.pack(side=tk.LEFT, padx=(0, 8))
+
+        self.move_cursor_var = tk.BooleanVar(value=False)
+        self.move_cursor_cb = ttk.Checkbutton(controls_top, text="Move cursor", variable=self.move_cursor_var)
+        self.move_cursor_cb.pack(side=tk.LEFT, padx=(0, 8))
+
+        self.send_clicks_var = tk.BooleanVar(value=False)
+        self.send_clicks_cb = ttk.Checkbutton(controls_top, text="Send clicks", variable=self.send_clicks_var)
+        self.send_clicks_cb.pack(side=tk.LEFT, padx=(0, 8))
+
         self.canvas = tk.Canvas(self.tab_screens, bg="black")
         self.canvas.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+        self.canvas.bind("<Button-1>", self._on_canvas_click)
+
         self.current_photo = None
 
         # Start periodic GUI updates
@@ -256,6 +284,30 @@ class App:
         self.log.delete("1.0", tk.END)
         self.log.configure(state=tk.DISABLED)
         self.log.update_idletasks()
+
+    def click(self, x, y, move_cursor=False):
+        file_name = None
+        args_string = None
+
+        duration_ms = 1000
+        steps = 30
+
+        if move_cursor:
+            file_name = "py-move-cursor-win.py"
+            args_string = f"--x {x} --y {y} --click --duration_ms {duration_ms} --steps {steps}"
+        else:
+            file_name = "py-perform-click-win.py"
+            args_string = f"--x {x} --y {y}"
+
+        args = shlex.split(args_string) if args_string is not None else []
+
+        command_thread = threading.Thread(
+            target=send_command,
+            args=("run_py", {"filename": file_name, "args": args}),
+            daemon=True
+        )
+
+        command_thread.start()
 
     def start_screenshots(self):
         self._send_command_without_args("start_screenshots")
@@ -370,8 +422,8 @@ class App:
             self._append_log(log_entry)
             return
 
-        arg_string = ask_args_for_script(self.root)
-        args = shlex.split(arg_string) if arg_string is not None else []
+        args_string = ask_args_for_script(self.root)
+        args = shlex.split(args_string) if args_string is not None else []
 
         command_thread = threading.Thread(
             target=send_command,
@@ -435,12 +487,50 @@ class App:
         photo = ImageTk.PhotoImage(last_img)
         self.current_photo = photo
 
+        self.canvas.delete("all")
+
         self.canvas.create_image(
             self.canvas.winfo_width() // 2,
             self.canvas.winfo_height() // 2,
             image=photo,
             anchor=tk.CENTER
         )
+
+    def _get_displayed_image_box(self):
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
+
+        left = (canvas_w - SCREENSHOT_TARGET_WIDTH) // 2
+        top = (canvas_h - SCREENSHOT_TARGET_HEIGHT) // 2
+        right = left + SCREENSHOT_TARGET_WIDTH
+        bottom = top + SCREENSHOT_TARGET_HEIGHT
+
+        return left, top, right, bottom
+
+    def _on_canvas_click(self, event):
+        left, top, right, bottom = self._get_displayed_image_box()
+
+        if not (left <= event.x <= right and top <= event.y <= bottom):
+            return
+
+        rel_x = event.x - left
+        rel_y = event.y - top
+
+        try:
+            remote_w = int(self.remote_width_var.get())
+            remote_h = int(self.remote_height_var.get())
+        except Exception:
+            remote_w = DEFAULT_REMOTE_WIDTH
+            remote_h = DEFAULT_REMOTE_HEIGHT
+
+        mapped_x = int(round(rel_x * (remote_w / float(SCREENSHOT_TARGET_WIDTH))))
+        mapped_y = int(round(rel_y * (remote_h / float(SCREENSHOT_TARGET_HEIGHT))))
+
+        move_cursor = bool(self.move_cursor_var.get())
+        send_clicks = bool(self.send_clicks_var.get())
+
+        if send_clicks:
+            self.click(mapped_x, mapped_y, move_cursor)
 
     def _process_queues(self):
         self._update_logs()
