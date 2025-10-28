@@ -285,6 +285,9 @@ class App:
     def open_photo(self):
         self._send_open_command_with_asking_file_name("open_photo")
 
+    def open_video(self):
+        self._send_open_command_with_asking_file_name("open_video")
+
     def play_wav(self):
         self._send_open_command_with_asking_file_name("play_wav")
 
