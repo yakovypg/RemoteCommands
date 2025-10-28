@@ -16,7 +16,7 @@
   "OPEN_URL_COMMAND": "open_url",
   "OPEN_PHOTO_COMMAND": "open_photo",
   "OPEN_VIDEO_COMMAND": "open_video",
-  "PLAY_WAV_COMMAND": "play_wav",
+  "PLAY_AUDIO_COMMAND": "play_audio",
   "RUN_BAT_COMMAND": "run_bat",
   "RUN_BASH_COMMAND": "run_bash",
   "RUN_PY_COMMAND": "run_py",

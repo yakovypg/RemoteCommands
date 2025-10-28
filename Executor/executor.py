@@ -47,7 +47,7 @@ OPEN_WITH_DEFAULT_APP_COMMAND = cfg["OPEN_WITH_DEFAULT_APP_COMMAND"]
 OPEN_URL_COMMAND = cfg["OPEN_URL_COMMAND"]
 OPEN_PHOTO_COMMAND = cfg["OPEN_PHOTO_COMMAND"]
 OPEN_VIDEO_COMMAND = cfg["OPEN_VIDEO_COMMAND"]
-PLAY_WAV_COMMAND = cfg["PLAY_WAV_COMMAND"]
+PLAY_AUDIO_COMMAND = cfg["PLAY_AUDIO_COMMAND"]
 RUN_BAT_COMMAND = cfg["RUN_BAT_COMMAND"]
 RUN_BASH_COMMAND = cfg["RUN_BASH_COMMAND"]
 RUN_PY_COMMAND = cfg["RUN_PY_COMMAND"]
@@ -216,7 +216,7 @@ def open_video(path):
     logger.info(f"Trying to open video {path}")
     return open_with_defaut_app(path)
 
-def play_wav_file(path):
+def play_audio(path):
     logger.info(f"Trying to play {path}")
 
     try:
@@ -227,9 +227,11 @@ def play_wav_file(path):
         process = None
 
         if sys.platform.startswith("win"):
-            # process = subprocess.Popen(["cmd", "/c", "start", "", "/min", path], shell=False)
-            import winsound
-            winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+            if path.endswith(".wav"):
+                import winsound
+                winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+            else:
+                process = subprocess.Popen(["cmd", "/c", "start", "", "/min", path], shell=False)
         elif sys.platform.startswith("darwin"):
             process = subprocess.Popen(["afplay", path])
         else:
@@ -400,11 +402,11 @@ def process_commands(commands):
 
             process_command(OPEN_VIDEO_COMMAND, lambda: open_video(filename))
 
-        elif command_name == PLAY_WAV_COMMAND:
-            payload = commands.get(PLAY_WAV_COMMAND)
+        elif command_name == PLAY_AUDIO_COMMAND:
+            payload = commands.get(PLAY_AUDIO_COMMAND)
             filename = payload.get("filename")
 
-            process_command(PLAY_WAV_COMMAND, lambda: play_wav_file(filename))
+            process_command(PLAY_AUDIO_COMMAND, lambda: play_audio(filename))
 
         elif command_name == RUN_BAT_COMMAND:
             payload = commands.get(RUN_BAT_COMMAND)
