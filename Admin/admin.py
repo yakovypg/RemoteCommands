@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import os
 import requests
 import shlex
 import threading
@@ -25,6 +26,7 @@ SEND_COMMAND_TO_CLIENT_URL = f"{SERVER_URL}send_command"
 
 REQUEST_TIMEOUT_SEC = float(cfg["REQUEST_TIMEOUT_SEC"])
 BEFORE_EXIT_TIMEOUT_SEC = float(cfg["BEFORE_EXIT_TIMEOUT_SEC"])
+SEND_NEXT_FILE_TIMEOUT_SEC = float(cfg["SEND_NEXT_FILE_TIMEOUT_SEC"])
 
 GET_CLIENT_BUFFER_INTERVAL_SEC = float(cfg["GET_CLIENT_BUFFER_INTERVAL_SEC"])
 PROCESS_QUEUES_INTERVAL_MS = int(cfg["PROCESS_QUEUES_INTERVAL_MS"])
@@ -222,6 +224,7 @@ class App:
         ttk.Button(controls_frame, text="Run BASH", width=20, command=self.run_bash).pack(pady=4)
         ttk.Button(controls_frame, text="Run PY", width=20, command=self.run_py).pack(pady=4)
         ttk.Button(controls_frame, text="Send File", width=20, command=self.send_file).pack(pady=4)
+        ttk.Button(controls_frame, text="Send Files", width=20, command=self.send_files).pack(pady=4)
         ttk.Button(controls_frame, text="Reboot", width=20, command=self.reboot).pack(pady=4)
         ttk.Button(controls_frame, text="Clear Logs", width=20, command=self.clear_logs).pack(pady=(20, 4))
         ttk.Button(controls_frame, text="Exit", width=20, command=self.on_close).pack(pady=4)
@@ -384,6 +387,50 @@ class App:
             daemon=True
         )
 
+        command_thread.start()
+
+    def send_files(self):
+        file_paths = filedialog.askopenfilenames(title="Choose files to send")
+
+        if not file_paths:
+            log_entry = create_log_entry(INFO_TYPE_ERROR, "send_file", "file(s) not selected")
+            self._append_log(log_entry)
+            return
+
+        files_queue = queue.Queue()
+
+        for file_path in file_paths:
+            output_name = os.path.basename(file_path)
+            files_queue.put((file_path, output_name))
+
+        stop_event = threading.Event()
+
+        def worker_sequential():
+            while not files_queue.empty() and not stop_event.is_set():
+                try:
+                    file_path, output_name = files_queue.get_nowait()
+                except queue.Empty:
+                    break
+
+                try:
+                    with open(file_path, "rb") as f:
+                        file_bytes = f.read()
+
+                    file_b64 = base64.b64encode(file_bytes).decode("utf-8")
+                except Exception as ex:
+                    log_entry = create_log_entry(
+                        INFO_TYPE_ERROR,
+                        "send_file",
+                        f"failed to prepare {file_path}: {ex}"
+                    )
+
+                    self._append_log(log_entry)
+                    continue
+
+                send_command("save_file", {"file_name": output_name, "file_b64": file_b64})
+                time.sleep(SEND_NEXT_FILE_TIMEOUT_SEC)
+
+        command_thread = threading.Thread(target=worker_sequential, daemon=True)
         command_thread.start()
 
     def reboot(self):
