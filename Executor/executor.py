@@ -48,6 +48,7 @@ OPEN_PHOTO_COMMAND = cfg["OPEN_PHOTO_COMMAND"]
 OPEN_VIDEO_COMMAND = cfg["OPEN_VIDEO_COMMAND"]
 PLAY_WAV_COMMAND = cfg["PLAY_WAV_COMMAND"]
 RUN_BAT_COMMAND = cfg["RUN_BAT_COMMAND"]
+RUN_BASH_COMMAND = cfg["RUN_BASH_COMMAND"]
 RUN_PY_COMMAND = cfg["RUN_PY_COMMAND"]
 SAVE_FILE_COMMAND = cfg["SAVE_FILE_COMMAND"]
 REBOOT_COMMAND = cfg["REBOOT_COMMAND"]
@@ -251,7 +252,7 @@ def play_wav_file(path):
         logger.warning(f"Failed to play {path}: {str(e)}")
         return False, None, str(e)
 
-def run_bat(path, args=[]):
+def run_script(path, process_args):
     logger.info(f"Trying to execute {path}")
 
     try:
@@ -261,10 +262,10 @@ def run_bat(path, args=[]):
 
         if sys.platform.startswith("win"):
             process = subprocess.Popen(
-                ["cmd", "/c", path] + args,
-                shell=False,
+                process_args,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                shell=False,
                 text=True
             )
 
@@ -277,25 +278,17 @@ def run_bat(path, args=[]):
         logger.warning(f"Failed to execute {path}: {str(e)}")
         return False, None, str(e)
 
+def run_bat(path, args=[]):
+    process_args = ["cmd", "/c", path] + args
+    return run_script(path, process_args)
+
+def run_bash(path, args=[]):
+    process_args = ["bash", path] + args
+    return run_script(path, process_args)
+
 def run_py(path, args=[]):
-    logger.info(f"Trying to execute {path}")
-
-    try:
-        if not os.path.exists(path):
-            return False, None, f"{path} not found"
-
-        process = subprocess.Popen(
-            [sys.executable, path] + args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-
-        logger.info(f"File {path} started executing")
-        return True, process, f"{path} started executing"
-    except Exception as e:
-        logger.warning(f"Failed to execute {path}: {str(e)}")
-        return False, None, str(e)
+    process_args = [sys.executable, path] + args
+    return run_script(path, process_args)
 
 def save_file(file_name, file_b64):
     logger.info(f"Trying to save {file_name}")
@@ -412,6 +405,13 @@ def process_commands(commands):
             args = payload.get("args", [])
 
             process_command(RUN_BAT_COMMAND, lambda: run_bat(filename, args))
+
+        elif command_name == RUN_BASH_COMMAND:
+            payload = commands.get(RUN_BASH_COMMAND)
+            filename = payload.get("filename")
+            args = payload.get("args", [])
+
+            process_command(RUN_BASH_COMMAND, lambda: run_bash(filename, args))
 
         elif command_name == RUN_PY_COMMAND:
             payload = commands.get(RUN_PY_COMMAND)

@@ -206,6 +206,7 @@ class App:
         ttk.Button(controls_frame, text="Open Video", width=20, command=self.open_video).pack(pady=4)
         ttk.Button(controls_frame, text="Play WAV", width=20, command=self.play_wav).pack(pady=4)
         ttk.Button(controls_frame, text="Run BAT", width=20, command=self.run_bat).pack(pady=4)
+        ttk.Button(controls_frame, text="Run BASH", width=20, command=self.run_bash).pack(pady=4)
         ttk.Button(controls_frame, text="Run PY", width=20, command=self.run_py).pack(pady=4)
         ttk.Button(controls_frame, text="Send File", width=20, command=self.send_file).pack(pady=4)
         ttk.Button(controls_frame, text="Reboot", width=20, command=self.reboot).pack(pady=4)
@@ -265,6 +266,9 @@ class App:
 
     def run_bat(self):
         self._send_run_script_command_with_asking_file_name_and_args("run_bat")
+
+    def run_bash(self):
+        self._send_run_script_command_with_asking_file_name_and_args("run_bash")
 
     def run_py(self):
         self._send_run_script_command_with_asking_file_name_and_args("run_py")
