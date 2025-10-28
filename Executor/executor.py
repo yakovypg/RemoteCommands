@@ -43,7 +43,9 @@ SCREENSHOT_TARGET_HEIGHT = int(cfg["SCREENSHOT_TARGET_HEIGHT"])
 
 START_SCREENSHOTS_COMMAND = cfg["START_SCREENSHOTS_COMMAND"]
 STOP_SCREENSHOTS_COMMAND = cfg["STOP_SCREENSHOTS_COMMAND"]
+OPEN_WITH_DEFAULT_APP_COMMAND = cfg["OPEN_WITH_DEFAULT_APP_COMMAND"]
 OPEN_PHOTO_COMMAND = cfg["OPEN_PHOTO_COMMAND"]
+OPEN_VIDEO_COMMAND = cfg["OPEN_VIDEO_COMMAND"]
 PLAY_WAV_COMMAND = cfg["PLAY_WAV_COMMAND"]
 RUN_BAT_COMMAND = cfg["RUN_BAT_COMMAND"]
 RUN_PY_COMMAND = cfg["RUN_PY_COMMAND"]
@@ -183,22 +185,34 @@ def stop_sending_screenshots():
 
     return True, None, "screenshots stopped being sent"
 
-def open_photo(path):
-    logger.info(f"Trying to open {path}")
+def open_with_defaut_app(obj):
+    logger.info(f"Trying to open {obj} with default app")
 
     try:
         if sys.platform.startswith("win"):
-            process = subprocess.Popen(["cmd", "/c", "start", "", path], shell=False)
+            process = subprocess.Popen(["cmd", "/c", "start", "", obj], shell=False)
         elif sys.platform.startswith("darwin"):
-            process = subprocess.Popen(['open', path])
+            process = subprocess.Popen(['open', obj])
         else:
-            process = subprocess.Popen(['xdg-open', path])
+            process = subprocess.Popen(['xdg-open', obj])
 
-        logger.info(f"File {path} opened")
-        return True, process, f"{path} opened"
+        logger.info(f"File {obj} opened")
+        return True, process, f"{obj} opened"
     except Exception as e:
-        logger.warning(f"Failed to open {path}: {str(e)}")
+        logger.warning(f"Failed to open {obj}: {str(e)}")
         return False, None, str(e)
+
+def open_url(url):
+    logger.info(f"Trying to open URL {url}")
+    return open_with_defaut_app(url)
+
+def open_photo(path):
+    logger.info(f"Trying to open photo {path}")
+    return open_with_defaut_app(path)
+
+def open_video(path):
+    logger.info(f"Trying to open video {path}")
+    return open_with_defaut_app(path)
 
 def play_wav_file(path):
     logger.info(f"Trying to play {path}")
@@ -368,11 +382,23 @@ def process_commands(commands):
         elif command_name == STOP_SCREENSHOTS_COMMAND:
             process_command(STOP_SCREENSHOTS_COMMAND, stop_sending_screenshots)
 
+        elif command_name == OPEN_WITH_DEFAULT_APP_COMMAND:
+            payload = commands.get(OPEN_WITH_DEFAULT_APP_COMMAND)
+            filename = payload.get("filename")
+
+            process_command(OPEN_WITH_DEFAULT_APP_COMMAND, lambda: open_with_defaut_app(filename))
+
         elif command_name == OPEN_PHOTO_COMMAND:
             payload = commands.get(OPEN_PHOTO_COMMAND)
             filename = payload.get("filename")
 
             process_command(OPEN_PHOTO_COMMAND, lambda: open_photo(filename))
+
+        elif command_name == OPEN_VIDEO_COMMAND:
+            payload = commands.get(OPEN_VIDEO_COMMAND)
+            filename = payload.get("filename")
+
+            process_command(OPEN_VIDEO_COMMAND, lambda: open_video(filename))
 
         elif command_name == PLAY_WAV_COMMAND:
             payload = commands.get(PLAY_WAV_COMMAND)
