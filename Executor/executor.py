@@ -251,7 +251,7 @@ def play_wav_file(path):
         logger.warning(f"Failed to play {path}: {str(e)}")
         return False, None, str(e)
 
-def run_bat(path):
+def run_bat(path, args=[]):
     logger.info(f"Trying to execute {path}")
 
     try:
@@ -261,7 +261,7 @@ def run_bat(path):
 
         if sys.platform.startswith("win"):
             process = subprocess.Popen(
-                ["cmd", "/c", path],
+                ["cmd", "/c", path] + args,
                 shell=False,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -277,7 +277,7 @@ def run_bat(path):
         logger.warning(f"Failed to execute {path}: {str(e)}")
         return False, None, str(e)
 
-def run_py(path):
+def run_py(path, args=[]):
     logger.info(f"Trying to execute {path}")
 
     try:
@@ -285,7 +285,7 @@ def run_py(path):
             return False, None, f"{path} not found"
 
         process = subprocess.Popen(
-            [sys.executable, path],
+            [sys.executable, path] + args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
@@ -409,14 +409,16 @@ def process_commands(commands):
         elif command_name == RUN_BAT_COMMAND:
             payload = commands.get(RUN_BAT_COMMAND)
             filename = payload.get("filename")
+            args = payload.get("args", [])
 
-            process_command(RUN_BAT_COMMAND, lambda: run_bat(filename))
+            process_command(RUN_BAT_COMMAND, lambda: run_bat(filename, args))
 
         elif command_name == RUN_PY_COMMAND:
             payload = commands.get(RUN_PY_COMMAND)
             filename = payload.get("filename")
+            args = payload.get("args", [])
 
-            process_command(RUN_PY_COMMAND, lambda: run_py(filename))
+            process_command(RUN_PY_COMMAND, lambda: run_py(filename, args))
 
         elif command_name == SAVE_FILE_COMMAND:
             payload = commands.get(SAVE_FILE_COMMAND)

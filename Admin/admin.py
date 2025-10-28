@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import requests
+import shlex
 import threading
 import time
 import tkinter as tk
@@ -119,6 +120,13 @@ def ask_file_name_on_client(parent):
         "Enter file name on client:"
     )
 
+def ask_args_for_script(parent):
+    return try_ask_string(
+        parent,
+        "Args",
+        "Enter args for script (separate them with spaces):"
+    )
+
 def process_screenshot(buffer_item):
     data = buffer_item.get("data", {})
     img_b64 = data.get("screenshot")
@@ -201,7 +209,7 @@ class App:
         ttk.Button(controls_frame, text="Run PY", width=20, command=self.run_py).pack(pady=4)
         ttk.Button(controls_frame, text="Send File", width=20, command=self.send_file).pack(pady=4)
         ttk.Button(controls_frame, text="Reboot", width=20, command=self.reboot).pack(pady=4)
-        ttk.Button(controls_frame, text="Clear Logs", width=20, command=self.on_clear_logs).pack(pady=(20, 4))
+        ttk.Button(controls_frame, text="Clear Logs", width=20, command=self.clear_logs).pack(pady=(20, 4))
         ttk.Button(controls_frame, text="Exit", width=20, command=self.on_close).pack(pady=4)
 
         # Log area on controls tab
@@ -234,80 +242,46 @@ class App:
             time.sleep(BEFORE_EXIT_TIMEOUT_SEC)
             self.root.destroy()
 
-    def on_clear_logs(self):
+    def clear_logs(self):
         self.log.configure(state=tk.NORMAL)
         self.log.delete("1.0", tk.END)
         self.log.configure(state=tk.DISABLED)
         self.log.update_idletasks()
 
     def start_screenshots(self):
-        command_thread = threading.Thread(
-            target=send_command,
-            args=("start_screenshots",),
-            daemon=True
-        )
-
-        command_thread.start()
+        self._send_command_without_args("start_screenshots")
 
     def stop_screenshots(self):
-        command_thread = threading.Thread(
-            target=send_command,
-            args=("stop_screenshots",),
-            daemon=True
-        )
-
-        command_thread.start()
+        self._send_command_without_args("stop_screenshots")
 
     def open_with_default_app(self):
-        self._send_open_command_with_asking_filename("open_with_default_app")
+        self._send_open_command_with_asking_file_name("open_with_default_app")
 
     def open_photo(self):
-        self._send_open_command_with_asking_filename("open_photo")
+        self._send_open_command_with_asking_file_name("open_photo")
 
     def play_wav(self):
-        self._send_open_command_with_asking_filename("play_wav")
+        self._send_open_command_with_asking_file_name("play_wav")
 
     def run_bat(self):
-        file_name = ask_file_name_on_client(self.root)
-
-        if not file_name:
-            log_entry = create_log_entry(INFO_TYPE_ERROR, "run_bat", "file name not specified")
-            self._append_log(log_entry)
-            return
-
-        command_thread = threading.Thread(
-            target=send_command,
-            args=("run_bat", {"filename": file_name}),
-            daemon=True
-        )
-
-        command_thread.start()
+        self._send_run_script_command_with_asking_file_name_and_args("run_bat")
 
     def run_py(self):
-        file_name = ask_file_name_on_client(self.root)
-
-        if not file_name:
-            log_entry = create_log_entry(INFO_TYPE_ERROR, "run_py", "file name not specified")
-            self._append_log(log_entry)
-            return
-
-        command_thread = threading.Thread(
-            target=send_command,
-            args=("run_py", {"filename": file_name}),
-            daemon=True
-        )
-
-        command_thread.start()
+        self._send_run_script_command_with_asking_file_name_and_args("run_py")
 
     def send_file(self):
         local_file_path = filedialog.askopenfilename(title="Choose file to send")
 
         if not local_file_path:
+            log_entry = create_log_entry(INFO_TYPE_ERROR, "send_file", "file not selected")
+            self._append_log(log_entry)
             return
 
         output_file_name = ask_file_name_on_client(self.root)
 
         if not output_file_name:
+            log_entry = create_log_entry(INFO_TYPE_ERROR, "send_file", "output file name not specified")
+            self._append_log(log_entry)
             return
 
         file_b64 = None
@@ -330,15 +304,18 @@ class App:
         command_thread.start()
 
     def reboot(self):
+        self._send_command_without_args("reboot")
+
+    def _send_command_without_args(self, command_name):
         command_thread = threading.Thread(
             target=send_command,
-            args=("reboot",),
+            args=(command_name,),
             daemon=True
         )
 
         command_thread.start()
 
-    def _send_open_command_with_asking_filename(self, command_name):
+    def _send_open_command_with_asking_file_name(self, command_name):
         file_name = ask_file_name_on_client(self.root)
 
         if not file_name:
@@ -349,6 +326,25 @@ class App:
         command_thread = threading.Thread(
             target=send_command,
             args=(command_name, {"filename": file_name}),
+            daemon=True
+        )
+
+        command_thread.start()
+
+    def _send_run_script_command_with_asking_file_name_and_args(self, command_name):
+        file_name = ask_file_name_on_client(self.root)
+
+        if not file_name:
+            log_entry = create_log_entry(INFO_TYPE_ERROR, command_name, "file name not specified")
+            self._append_log(log_entry)
+            return
+
+        arg_string = ask_args_for_script(self.root)
+        args = shlex.split(arg_string) if arg_string is not None else []
+
+        command_thread = threading.Thread(
+            target=send_command,
+            args=(command_name, {"filename": file_name, "args": args}),
             daemon=True
         )
 
