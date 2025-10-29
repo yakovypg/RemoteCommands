@@ -156,8 +156,8 @@ if __name__ == "__main__":
     parser.add_argument('-y', '--btn_yes_text', type=str, required=True, help='text of button \'yes\'')
     parser.add_argument('-n', '--btn_no_text', type=str, required=True, help='text of button \'no\'')
     parser.add_argument('-d', '--btn_dk_text', type=str, required=True, help='text of button \'don\'t know\'')
-    parser.add_argument('-p', '--pass_answer', action='store_true', default=True, help='pass answer from message box to process (default: True)')
-    parser.add_argument('-a', '--process_args', nargs='*', default=None, help='arguments for starting new process (default: None)')
+    parser.add_argument('-p', '--pass_answer', action='store_true', default=False, help='pass answer from message box to process (default: True)')
+    parser.add_argument('target_script_args', nargs=argparse.REMAINDER, help='arguments for starting new process')
 
     args = parser.parse_args()
 
@@ -165,8 +165,11 @@ if __name__ == "__main__":
     btn_yes_text = args.btn_yes_text
     btn_no_text = args.btn_no_text
     btn_dk_text = args.btn_dk_text
-    process_args = args.process_args
     pass_answer = args.pass_answer
+    process_args = args.target_script_args or []
+
+    if len(process_args) > 0 and process_args[0] == '--':
+        process_args = process_args[1:]
 
     res = message_box_custom()
     print("selected:", res)

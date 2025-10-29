@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-n', '--image_names', nargs='+', required=True, help='image names')
     parser.add_argument('-i', '--min_interval_ms', type=int, default=1000, help='minimum interval between setting wallpapers in milliseconds (default: 1000)')
-    parser.add_argument('-s', '--style', type=int, default=10, help='style of wallpaper: 0=center, 2=stretch, 6=fill, 10=fit, 22=tile (default: 10)')
+    parser.add_argument('-s', '--style', type=int, default=2, help='style of wallpaper: 0=center, 2=stretch, 6=fill, 10=fit, 22=tile (default: 2)')
     parser.add_argument('-p', '--set_wallpaper_script_path', type=str, default='bat-set-wallpaper.bat', help='path to the script for setting wallpaper (default: bat-set-wallpaper.bat)')
 
     args = parser.parse_args()

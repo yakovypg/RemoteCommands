@@ -51,7 +51,8 @@ if __name__ == "__main__":
     pygame_version = args.pygame_version
     target_script_args = args.target_script_args or []
 
-    target_script_args = [i for i in target_script_args if i != '--']
+    if len(target_script_args) > 0 and target_script_args[0] == '--':
+        target_script_args = target_script_args[1:]
 
     if not target_script_path.exists():
         print(f"{target_script_path} not found")
