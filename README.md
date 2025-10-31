@@ -19,12 +19,11 @@
 
 ## Main Features
 This project supports the following remote commands:
-- Start sending screenshots.
-- Stop sending screenshots.
-- Play `.wav` file.
-- Execute `.bat` script.
-- Execute `.py` script.
-- Send file.
+- Start/stop sending screenshots.
+- Open file with default app.
+- Open URL, photo, video, audio.
+- Execute `.bat`, `.bash`, `.py` scripts.
+- Send files.
 - Reboot PC.
 
 ## Quick Start
