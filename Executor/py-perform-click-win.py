@@ -73,8 +73,16 @@ if __name__ == "__main__":
 
     parser.add_argument('-x', '--x', type=int, required=True, help='x coordinate')
     parser.add_argument('-y', '--y', type=int, required=True, help='y coordinate')
-    parser.add_argument('-a', '--interval_after_move_ms', type=float, default=0.01, help='interval after moving cursor in milliseconds (default: 0.01)')
-    parser.add_argument('-b', '--interval_between_clicks_ms', type=float, default=0.05, help='interval between clicks in milliseconds (default: 0.05)')
+
+    parser.add_argument(
+        '-a', '--interval_after_move_ms', type=float, default=0.01,
+        help='interval after moving cursor in milliseconds (default: 0.01)'
+    )
+
+    parser.add_argument(
+        '-b', '--interval_between_clicks_ms', type=float, default=0.05,
+        help='interval between clicks in milliseconds (default: 0.05)'
+    )
 
     args = parser.parse_args()
 

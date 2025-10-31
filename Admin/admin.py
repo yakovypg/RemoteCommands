@@ -215,7 +215,14 @@ class App:
 
         ttk.Button(controls_frame, text="Start Screenshots", width=20, command=self.start_screenshots).pack(pady=4)
         ttk.Button(controls_frame, text="Stop Screenshots", width=20, command=self.stop_screenshots).pack(pady=4)
-        ttk.Button(controls_frame, text="Open With Default App", width=20, command=self.open_with_default_app).pack(pady=4)
+
+        ttk.Button(
+            controls_frame,
+            text="Open With Default App",
+            width=20,
+            command=self.open_with_default_app
+        ).pack(pady=4)
+
         ttk.Button(controls_frame, text="Open URL", width=20, command=self.open_url).pack(pady=4)
         ttk.Button(controls_frame, text="Open Photo", width=20, command=self.open_photo).pack(pady=4)
         ttk.Button(controls_frame, text="Open Video", width=20, command=self.open_video).pack(pady=4)

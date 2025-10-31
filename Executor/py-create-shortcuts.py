@@ -9,7 +9,11 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--icon_name', type=str, required=True, help='shortcut icon name')
     parser.add_argument('-l', '--link', type=str, required=True, help='shortcut link')
     parser.add_argument('-c', '--shortcuts_count', type=int, default=10, help='number of shortcuts (default: 10)')
-    parser.add_argument('-p', '--create_shortcut_script_path', type=str, default='bat-create-shortcut.bat', help='path to the script for creating shortcut (default: bat-create-shortcut.bat)')
+
+    parser.add_argument(
+        '-p', '--create_shortcut_script_path', type=str, default='bat-create-shortcut.bat',
+        help='path to the script for creating shortcut (default: bat-create-shortcut.bat)'
+    )
 
     args = parser.parse_args()
 

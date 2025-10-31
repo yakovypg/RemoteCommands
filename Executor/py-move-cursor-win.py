@@ -1,7 +1,6 @@
 import argparse
 import ctypes
 import time
-import math
 
 SendInput = ctypes.windll.user32.SendInput
 GetSystemMetrics = ctypes.windll.user32.GetSystemMetrics

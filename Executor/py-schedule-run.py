@@ -68,8 +68,15 @@ def run_script(path: Path):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-p', '--paths', nargs='+', type=str, required=True, help='paths to python scripts (same count as --times)')
-    parser.add_argument('-t', '--times', nargs='+', type=str, required=True, help="times to start scripts. Format 'HH:MM' (today or tomorrow) or 'YYYY-MM-DD HH:MM'")
+    parser.add_argument(
+        '-p', '--paths', nargs='+', type=str, required=True,
+        help='paths to python scripts (same count as --times)'
+    )
+
+    parser.add_argument(
+        '-t', '--times', nargs='+', type=str, required=True,
+        help="times to start scripts. Format 'HH:MM' (today or tomorrow) or 'YYYY-MM-DD HH:MM'"
+    )
 
     args = parser.parse_args()
 
@@ -92,7 +99,7 @@ def main():
         wait_until(run_at)
         run_script(path)
 
-    print(f"all scheduled scripts processed")
+    print("all scheduled scripts processed")
 
 if __name__ == "__main__":
     main()

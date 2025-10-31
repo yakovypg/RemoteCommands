@@ -95,8 +95,6 @@ def wnd_proc(hWnd, msg, wParam, lParam):
     return user32.DefWindowProcW(hWnd, msg, wParam, lParam)
 
 def message_box_custom():
-    global result_box
-
     className = "MyMsgBoxClass_final"
     wndclass = WNDCLASS()
     wndclass.style = 0
@@ -156,7 +154,12 @@ if __name__ == "__main__":
     parser.add_argument('-y', '--btn_yes_text', type=str, required=True, help='text of button \'yes\'')
     parser.add_argument('-n', '--btn_no_text', type=str, required=True, help='text of button \'no\'')
     parser.add_argument('-d', '--btn_dk_text', type=str, required=True, help='text of button \'don\'t know\'')
-    parser.add_argument('-p', '--pass_answer', action='store_true', default=False, help='pass answer from message box to process (default: True)')
+
+    parser.add_argument(
+        '-p', '--pass_answer', action='store_true', default=False,
+        help='pass answer from message box to process (default: True)'
+    )
+
     parser.add_argument('target_script_args', nargs=argparse.REMAINDER, help='arguments for starting new process')
 
     args = parser.parse_args()

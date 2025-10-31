@@ -11,8 +11,17 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--image_path', type=str, required=True, help='path to the image')
     parser.add_argument('-W', '--screen_width', type=int, default=1920, help='screen width (default: 1920)')
     parser.add_argument('-H', '--screen_height', type=int, default=1080, help='screen height (default: 1080)')
-    parser.add_argument('-c', '--falling_items_count', type=int, default=30, help='number of falling items (default: 30)')
-    parser.add_argument('-t', '--animation_time_ms', type=int, default=10000, help='animation time in milliseconds (default: 10000)')
+
+    parser.add_argument(
+        '-c', '--falling_items_count', type=int, default=30,
+        help='number of falling items (default: 30)'
+    )
+
+    parser.add_argument(
+        '-t', '--animation_time_ms', type=int, default=10000,
+        help='animation time in milliseconds (default: 10000)'
+    )
+
     parser.add_argument('--resized_image_width', type=int, default=50, help='resized image width (default: 50)')
     parser.add_argument('--resized_image_height', type=int, default=30, help='resized image height (default: 30)')
     parser.add_argument('--fps', type=int, default=60, help='frames per second (default: 60)')

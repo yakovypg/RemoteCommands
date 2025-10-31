@@ -12,7 +12,11 @@ def parse_args():
 
     parser.add_argument('-i', '--image', type=str, required=True, help="path to image")
     parser.add_argument('-s', '--sound', type=str, required=True, help="path to sound")
-    parser.add_argument('-d', '--duration_ms', type=int, default=4000, help="showing duration in milliseconds (default: 4000)")
+
+    parser.add_argument(
+        '-d', '--duration_ms', type=int, default=4000,
+        help="showing duration in milliseconds (default: 4000)"
+    )
 
     return parser.parse_args()
 
