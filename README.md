@@ -7,7 +7,7 @@
   <a href="https://github.com/yakovypg/RemoteCommands/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-darkyellow.svg" alt="license" />
   </a>
-  <img src="https://img.shields.io/badge/Version-1.0.0-red.svg" alt="version" />
+  <img src="https://img.shields.io/badge/Version-1.0.1-red.svg" alt="version" />
   <img src="https://img.shields.io/badge/Python-3.11-blue" alt="csharp" />
 </p>
 
