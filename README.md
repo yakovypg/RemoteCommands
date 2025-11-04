@@ -11,6 +11,9 @@
   <img src="https://img.shields.io/badge/Python-3.11-blue" alt="csharp" />
 </p>
 
+## Warning
+By proceeding to use this application, you acknowledge and agree that it will be used exclusively for peaceful and constructive purposes. Use it responsibly.
+
 ## About
 **RemoteCommands** is a collection of cross-platform applications designed for remote command execution. It consists of **Admin**, the application for sending commands; **Executor**, the application for executing commands; and **Server**, the application that provides communication between Admin and Executor.
 
